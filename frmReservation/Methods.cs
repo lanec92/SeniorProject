@@ -10,6 +10,7 @@ namespace frmReservation
 {
     class Methods
     {
+
         public static void AddParameters(SqlCommand cmd, string s, TextBox txt)
         {
             cmd.Parameters.Add(new SqlParameter(s, txt.Text));

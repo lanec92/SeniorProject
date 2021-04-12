@@ -29,6 +29,7 @@ namespace frmReservation
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
+            //User does not enter username and/or password
             if (txtUserName.Text == "" || txtPassword.Text == "")
             {
                 MessageBox.Show("Please enter Username and Password.", "Information Required",
@@ -46,7 +47,7 @@ namespace frmReservation
                     command.Parameters.AddWithValue("@username", txtUserName.Text);
                     command.Parameters.AddWithValue("@password", txtPassword.Text);
 
-                    int loginResult = Convert.ToInt32(command.ExecuteScalar());
+                    int loginResult = Convert.ToInt32(command.ExecuteScalar()); //Save result 1 or 0
 
                     if (loginResult == 1)
                     {

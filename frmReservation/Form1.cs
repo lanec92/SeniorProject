@@ -74,7 +74,7 @@ namespace frmReservation
 
                     command = new SqlCommand("INSERT INTO PassengerSeats (PassengerID, SeatID)" +
                         "SELECT MAX(PassengerID), 0 FROM PASSENGERS", con);
-                    command.ExecuteNonQuery(); // dont need reader since we are just inserting into db
+                    command.ExecuteNonQuery(); 
 
                     MessageBox.Show("Passenger " + txtPassName.Text + " was added to the waiting list.",
                     "Waiting List", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -94,31 +94,30 @@ namespace frmReservation
             }
 
             // If all is Ok add passenger and seat selected to db
-            //Insert new passenger into db
-            //Update seat to taken in seats db
-            //Insert passenger and seat ID in passengerSeats db
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
+
+                //Insert new passenger into db
                 command = new SqlCommand("INSERT INTO PASSENGERS (PassengerName, PassengerOnWaitingList)" +
                     "VALUES (@PassengerName, 0)", con);
                 Methods.AddParameters(command, "PassengerName", txtPassName);
                 command.ExecuteNonQuery();
 
+                //Update seat to taken in seats db
                 command = new SqlCommand("Update SEATS SET IsTaken = 1 WHERE " +
                     "SeatRow = @SeatRow AND SeatColumn = @SeatColumn", con);
                 Methods.AddParameters(command, "SeatRow", cmbSeatRow);
                 Methods.AddParameters(command, "SeatColumn", checkBtn);
                 command.ExecuteNonQuery();
 
+                //Insert passenger and seat ID in passengerSeats table
                 command = new SqlCommand("INSERT INTO PassengerSeats (SeatID, PassengerID) " +
                     "Select Seats.SeatID, (SELECT MAX(PassengerID) FROM PASSENGERS)" +
                     " FROM SEATS WHERE Seats.SeatRow = @SeatRow AND Seats.SeatColumn = " +
                     "@SeatColumn", con);
                 Methods.AddParameters(command, "SeatRow", cmbSeatRow);
-
                 Methods.AddParameters(command, "SeatColumn", checkBtn);
-
                 command.ExecuteNonQuery();
 
                 MessageBox.Show("Passenger has been added.",
@@ -132,15 +131,11 @@ namespace frmReservation
         //Shows All passengers
         private void btnShowPass_Click(object sender, EventArgs e)
         {
-            // Get all passenger info from all 3 tables using Inner Join
-
-            // Place the result into DataTable and display result in passenger info form
-
-            //repopulate list with updated records
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
 
+                // Get all passenger info from all 3 tables using Inner Join
                 command = new SqlCommand
                     ("SELECT p.PassengerID as ID, p.PassengerName as Name, s.SeatRow, s.SeatColumn, " +
                     "p.PassengerOnWaitingList as OnWaitingList " +
@@ -153,10 +148,13 @@ namespace frmReservation
                     "WHERE p.PassengerOnWaitingList = 1 " +
                     "ORDER BY s.SeatRow, s.SeatColumn", con);
 
+                // Place the result into DataTable and display result in passenger info form
                 DataTable dTable = new DataTable();
                 dTable.Load(command.ExecuteReader());
                 PassengerInfo frm = new PassengerInfo(dTable);
                 frm.ShowDialog();
+
+                //repopulate list with updated records
                 PopAirplane();
             }
         }
@@ -164,14 +162,13 @@ namespace frmReservation
         //Search for a passenger
         private void btnSearchPass_Click(object sender, EventArgs e)
         {
-            // make sure search string was enter into the text box
-            //Get all passengers that match the search string getting info from all 3 tables
-            //Place the result in a DataTable and display in passenger info form 
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
+                // make sure search string was enter into the text box
                 if (!txtPassName.Text.Trim().Equals(""))
                 {
+                    //Get all passengers that match the search string getting info from all 3 tables
                     command = new SqlCommand
                         ("SELECT p.PassengerID as ID, p.PassengerName as Name, s.SeatRow, s.SeatColumn, " +
                         "p.PassengerOnWaitingList as OnWaitingList " +
@@ -184,13 +181,14 @@ namespace frmReservation
                         "FROM Passengers p " +
                         "WHERE p.PassengerOnWaitingList = 1 AND p.PassengerName LIKE @PassengerName " +
                         "ORDER BY s.SeatRow, s.SeatColumn", con);
-                    
                     command.Parameters.Add(new SqlParameter("PassengerName", "%" + txtPassName.Text + "%"));
 
-                DataTable dTable = new DataTable();
+                    //Place the result in a DataTable and display in passenger info form 
+                    DataTable dTable = new DataTable();
                     dTable.Load(command.ExecuteReader());
                     PassengerInfo frm = new PassengerInfo(dTable);
                     frm.ShowDialog();
+
                     PopAirplane();
                 }
                 else
@@ -206,16 +204,15 @@ namespace frmReservation
         //Display the seats
         private void PopAirplane()
         {
-            //Select * from seats db read result and create a seat object w/ ID, Row, Column and IsTaken from the reader
-            //Add the seat object to the list
-            //loop through the list and display the content in the list box
-
             //Clear previous listbox and list of Seats
             lstOutput.Items.Clear();
             seats.Clear();
+
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
+
+                //Select * from seats db read result and create a seat object w/ ID, Row, Column and IsTaken from the reader
                 command = new SqlCommand("SELECT * FROM SEATS ORDER BY SEATROW, SEATCOLUMN", con);
                 reader = command.ExecuteReader(); // results of command
                 while(reader.Read())
@@ -225,7 +222,8 @@ namespace frmReservation
                     seat.SeatRow = Convert.ToInt32(reader["SEATROW"]);
                     seat.SeatColumn = reader["SEATCOLUMN"].ToString();
                     seat.IsSeatTaken = Convert.ToBoolean(reader["ISTAKEN"]);
-                    seats.Add(seat);
+                    seats.Add(seat); //Add the seat object to the list
+
                 }
 
                 //Display available seats in lstOutput
@@ -263,11 +261,12 @@ namespace frmReservation
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
-                command = new SqlCommand("SELECT DISTINCT SEATROW FROM SEATS ORDER BY SEATROW", con);
+
+                command = new SqlCommand("SELECT DISTINCT SEATROW FROM SEATS ORDER BY SeatRow", con);
                 reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    cmbSeatRow.Items.Add(reader["SEATROW"]);
+                    cmbSeatRow.Items.Add(reader["SeatRow"]);
                 }
             }
         }

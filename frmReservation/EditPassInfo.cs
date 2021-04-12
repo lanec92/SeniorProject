@@ -76,13 +76,10 @@ namespace frmReservation
             }
 
             // Update passenger record
-            //1. Get id of the new seat
-            //2. check if seat is taken 
-            //3. check is passenger is just updating name and if so ignore that the seat is taken(its the same passenger)
-            //4. update all tables name seat taken or not taken etc.
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
+
                 command = new SqlCommand("SELECT SeatID, IsTaken FROM Seats WHERE " +
                     "SeatRow = @SeatRow AND SeatColumn = @SeatColumn", con);
                 command.Parameters.Add(new SqlParameter("SeatRow", cmbRow.SelectedItem));
@@ -100,6 +97,7 @@ namespace frmReservation
                 //check if only the name is being updated. 
                 //If not, exit because the user needs to pick a different seat
                 int oldID = 0;
+
                 if (txtSeatID.Text.Equals(""))
                     oldID = 0;
                 else
@@ -115,6 +113,7 @@ namespace frmReservation
                     }
                 }
                 else
+
                     newSeatID = 0;
 
                 //update passenger's name
@@ -123,22 +122,18 @@ namespace frmReservation
                 Methods.AddParameters(command, "PassengerName", txtName);
                 Methods.AddParameters(command, "OnWaitingList", chbOnList);
                 Methods.AddParameters(command, "PassengerID", txtPassID);
-
-
                 command.ExecuteNonQuery();
 
                 //make original seat available
                 command = new SqlCommand("UPDATE Seats SET IsTaken = 0 WHERE " +
                     "seatID = @seatID", con);
                 Methods.AddParameters(command, "seatID", txtSeatID);
-                //command.Parameters.Add(new SqlParameter("seatID", txtSeatID.Text));
                 command.ExecuteNonQuery();
 
                 //make new seat taken
                 command = new SqlCommand("UPDATE Seats SET IsTaken = 1 WHERE " +
                     "seatID = @seatID", con);
                 Methods.AddParameters(command, "seatID", newSeatID);
-                //command.Parameters.Add(new SqlParameter("seatID", newSeatID));
                 command.ExecuteNonQuery();
 
                 //update old seatID with the new one
@@ -146,9 +141,6 @@ namespace frmReservation
                     "PassengerID = @PassengerID", con);
                 Methods.AddParameters(command, "SeatID", newSeatID);
                 Methods.AddParameters(command, "PassengerID", txtPassID);
-
-                //command.Parameters.Add(new SqlParameter("SeatID", newSeatID));
-                //command.Parameters.Add(new SqlParameter("PassengerID", txtPassID.Text));
                 command.ExecuteNonQuery();
 
                 MessageBox.Show("Record has been updated", "Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -158,38 +150,31 @@ namespace frmReservation
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            //Ask user if they want to delete passengers
-            //If not then exit
-            //If yes then delete passenger from passenger and passengerseats
-            //The seat still exists but we need to update the seats table and mark the seat as not taken
-
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
 
+                //Ask user if they want to delete passengers
                 var msg = MessageBox.Show("Are you sure you want to delete " + txtName.Text + ". This action cannot be undone", 
                     "Delete Record", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
 
                 if (msg == DialogResult.No)
                     return;
 
+                //delete passenger from passenger and passengerseats
                 command = new SqlCommand("DELETE FROM PASSENGERS WHERE PassengerID = @PassengerID", con);
-                //command.Parameters.Add(new SqlParameter("PassengerID", txtPassID.Text));
                 Methods.AddParameters(command, "PassengerID", txtPassID);
                 command.ExecuteNonQuery();
 
                 command = new SqlCommand("DELETE FROM PASSENGERSEATS WHERE PassengerID = @PassengerID", con);
                 Methods.AddParameters(command, "PassengerID", txtPassID);
-
-                //command.Parameters.Add(new SqlParameter("PassengerID", txtPassID.Text));
                 command.ExecuteNonQuery();
 
                 if(!txtSeatID.Text.Equals(""))
                 {
+                    //The seat still exists so we need to update the seats table and mark the seat as not taken
                     command = new SqlCommand("UPDATE SEATS SET IsTaken = 0 WHERE SeatID = @SeatID", con);
-                    //command.Parameters.Add(new SqlParameter("SeatID", txtSeatID.Text));
                     Methods.AddParameters(command, "SeatID", txtSeatID);
-
                     command.ExecuteNonQuery();
                 }
 

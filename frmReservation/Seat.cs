@@ -13,6 +13,8 @@ namespace frmReservation
         public int SeatRow { get; set; }
         public string SeatColumn { get; set; }
         public bool IsSeatTaken { get; set; }
+
+        //db Objects
         private SqlCommand command;
         private SqlDataReader reader;
 
@@ -35,12 +37,11 @@ namespace frmReservation
             using (var con = new SqlConnection(DBObjects.conString))
             {
                 con.Open();
+
                 command = new SqlCommand("SELECT * FROM SEATS WHERE SEATROW = @SEATROW AND SEATCOLUMN = @SEATCOLUMN " +
                     "AND ISTAKEN = 0", con);
-                //command.Parameters.Add(new SqlParameter("SEATROW", seatRow));
                 Methods.AddParameters(command, "SEATROW", seatRow);
                 Methods.AddParameters(command, "SEATCOLUMN", seatColumn);
-                // command.Parameters.Add(new SqlParameter("SEATCOLUMN", seatColumn));
                 reader = command.ExecuteReader();
 
                 return !reader.HasRows ? true : false;
