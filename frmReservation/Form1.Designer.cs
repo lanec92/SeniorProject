@@ -220,6 +220,7 @@ namespace frmReservation
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "frmReservation";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Airline Reservation";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmReservation_Closing);
             this.Load += new System.EventHandler(this.frmReservation_Load);

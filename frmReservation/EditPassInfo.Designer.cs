@@ -227,6 +227,7 @@ namespace frmReservation
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Name = "EditPassInfo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Edit Passenger Information";
             this.Load += new System.EventHandler(this.EditPassInfo_Load);
             this.ResumeLayout(false);

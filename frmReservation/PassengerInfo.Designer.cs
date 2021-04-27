@@ -77,6 +77,7 @@ namespace frmReservation
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.dgvOutput);
             this.Name = "PassengerInfo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Passenger Information";
             this.Load += new System.EventHandler(this.PassengerInfo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvOutput)).EndInit();
